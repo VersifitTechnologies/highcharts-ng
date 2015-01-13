@@ -315,14 +315,25 @@ if (typeof module !== 'undefined' && typeof exports !== 'undefined' && module.ex
 
         angular.forEach(axisNames, function(axisName) {
           scope.$watch('config.' + axisName, function (newAxes, oldAxes) {
-            if (newAxes === oldAxes) return;
-            if(newAxes) {
-              chart[axisName][0].update(newAxes, false);
-              updateZoom(chart[axisName][0], angular.copy(newAxes));
-              chart.redraw();
+            if (newAxes === oldAxes || !newAxes) return;
+            
+            if(newAxes instanceof Array) {
+                for(var axe_index in newAxes) {
+                    var axe = newAxes[axe_index];
+                    if(axe_index < chart[axisName].length) {
+                        chart[axisName][axe_index].update(axe, false);
+                        updateZoom(chart[axisName][axe_index], angular.copy(axe));
+                    }
+                }
             }
+            else {
+                chart[axisName][0].update(newAxes, false);
+                updateZoom(chart[axisName][0], angular.copy(newAxes));
+            }
+            chart.redraw();
           }, true);
         });
+        
         scope.$watch('config.options', function (newOptions, oldOptions, scope) {
           //do nothing when called on registration
           if (newOptions === oldOptions) return;
